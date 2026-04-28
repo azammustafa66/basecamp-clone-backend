@@ -1,0 +1,46 @@
+{
+  "name": "express-ts",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "dev": "bun run --hot index.ts",
+    "start": "bun run index.ts"
+  },
+  "dependencies": {
+    "@types/cookie-parser": "~1.4.10",
+    "bcrypt": "~6.0.0",
+    "bullmq": "^5.76.2",
+    "cookie-parser": "~1.4.7",
+    "cors": "~2.8.6",
+    "express": "~4.19.2",
+    "express-validator": "~7.3.2",
+    "ioredis": "^5.10.1",
+    "jsonwebtoken": "~9.0.3",
+    "mailgen": "~2.0.34",
+    "mongoose": "~9.5.0",
+    "morgan": "~1.10.1",
+    "nodemailer": "~8.0.5",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "winston": "~3.19.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "~6.0.0",
+    "@types/bun": "latest",
+    "@types/cors": "~2.8.19",
+    "@types/express": "~4.17.25",
+    "@types/express-validator": "~3.0.2",
+    "@types/ioredis": "^5.0.0",
+    "@types/jsonwebtoken": "~9.0.10",
+    "@types/mailgen": "~2.0.7",
+    "@types/morgan": "~1.9.10",
+    "@types/nodemailer": "~8.0.0",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "prettier": "3.8.3",
+    "typescript": "~5.9.3"
+  },
+  "peerDependencies": {}
+}

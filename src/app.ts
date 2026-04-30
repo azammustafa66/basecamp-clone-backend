@@ -25,13 +25,14 @@ app.use(
   cookieParser(),
 );
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
-
-app.use(mainRouter);
 
 // ─── API Docs ─────────────────────────────────────────────────────────────────
 
 app.use('/api/v1/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// ─── Routes ───────────────────────────────────────────────────────────────────
+
+app.use(mainRouter);
 
 app.get('/', (req, res) => {
   res.status(200).json(new APIResponse(200, { message: 'Server up and running' }));

@@ -1,12 +1,9 @@
 import express, { type Request, type Response, type NextFunction } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import swaggerUi from 'swagger-ui-express';
-
 import { mainRouter } from './routes/index';
 import { APIResponse, type APIError } from './utils/index';
 import logger from './utils/logger';
-import { swaggerSpec } from './config/swagger';
 
 const app = express();
 
@@ -25,11 +22,6 @@ app.use(
   cookieParser(),
 );
 
-
-// ─── API Docs ─────────────────────────────────────────────────────────────────
-
-app.use('/api/v1/api-docs', swaggerUi.serve);
-app.get('/api/v1/api-docs', swaggerUi.setup(swaggerSpec));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 

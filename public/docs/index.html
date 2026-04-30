@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basecamp Clone — API Docs</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --text: #e2e8f0;
+      --muted: #8892a4;
+      --accent: #6366f1;
+      --get: #10b981;
+      --post: #3b82f6;
+      --patch: #f59e0b;
+      --delete: #ef4444;
+      --sidebar-w: 260px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── Sidebar ── */
+    aside {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0; left: 0;
+      overflow-y: auto;
+      padding: 24px 0 48px;
+    }
+
+    .logo {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .logo h1 { font-size: 15px; font-weight: 700; color: var(--text); }
+    .logo p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .nav-section { margin-bottom: 4px; }
+    .nav-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: 10px 20px 4px;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 20px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color .15s, background .15s;
+      border-radius: 0;
+    }
+    .nav-link:hover { color: var(--text); background: rgba(255,255,255,.04); }
+    .nav-link.active { color: var(--accent); }
+
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      flex-shrink: 0;
+    }
+    .GET    { background: rgba(16,185,129,.15); color: var(--get); }
+    .POST   { background: rgba(59,130,246,.15); color: var(--post); }
+    .PATCH  { background: rgba(245,158,11,.15); color: var(--patch); }
+    .DELETE { background: rgba(239,68,68,.15);  color: var(--delete); }
+
+    /* ── Main ── */
+    main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 48px 56px;
+      max-width: 860px;
+    }
+
+    section { margin-bottom: 64px; }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    h2 span {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--muted);
+      margin-left: 10px;
+    }
+
+    .intro { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+
+    /* ── Endpoint card ── */
+    .endpoint {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .endpoint-header:hover { background: rgba(255,255,255,.03); }
+
+    .method-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      min-width: 54px;
+      text-align: center;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .path {
+      font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+      font-size: 13px;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .auth-pill {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .auth-pill.required { border-color: rgba(99,102,241,.4); color: var(--accent); }
+
+    .endpoint-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-left: auto;
+      text-align: right;
+      max-width: 240px;
+    }
+
+    .endpoint-body {
+      display: none;
+      padding: 0 18px 18px;
+      border-top: 1px solid var(--border);
+    }
+    .endpoint-body.open { display: block; }
+
+    .detail-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      margin: 16px 0 6px;
+    }
+
+    pre {
+      background: #0a0c14;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 16px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      color: #a5b4fc;
+      overflow-x: auto;
+      white-space: pre;
+      line-height: 1.7;
+    }
+
+    .fields {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .field-name {
+      font-family: monospace;
+      color: #a5b4fc;
+      min-width: 140px;
+    }
+    .field-type { color: var(--get); font-size: 12px; min-width: 60px; }
+    .field-note { color: var(--muted); }
+    .required-star { color: var(--delete); margin-left: 2px; }
+
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(99,102,241,.12);
+      color: var(--accent);
+      margin-right: 4px;
+      margin-bottom: 6px;
+    }
+
+    /* ── Overview cards ── */
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+    }
+    .card-title { font-size: 12px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .06em; }
+    .card-value { font-size: 14px; color: var(--text); font-family: monospace; }
+
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    code {
+      font-family: monospace;
+      font-size: 12px;
+      background: rgba(99,102,241,.1);
+      color: #a5b4fc;
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    p { color: var(--muted); margin-bottom: 12px; }
+
+    .chevron {
+      margin-left: auto;
+      color: var(--muted);
+      transition: transform .2s;
+      flex-shrink: 0;
+    }
+    .chevron.open { transform: rotate(180deg); }
+  </style>
+</head>
+<body>
+
+<!-- ─── Sidebar ─────────────────────────────────────────────────── -->
+<aside>
+  <div class="logo">
+    <h1>Basecamp Clone</h1>
+    <p>REST API — v1.0</p>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">General</div>
+    <a class="nav-link" href="#overview">Overview</a>
+    <a class="nav-link" href="#auth-info">Authentication</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Auth</div>
+    <a class="nav-link" href="#auth"><span class="badge POST">POST</span> Register</a>
+    <a class="nav-link" href="#auth"><span class="badge POST">POST</span> Login</a>
+    <a class="nav-link" href="#auth"><span class="badge POST">POST</span> Logout</a>
+    <a class="nav-link" href="#auth"><span class="badge POST">POST</span> Refresh Token</a>
+    <a class="nav-link" href="#auth"><span class="badge GET">GET</span> Verify Email</a>
+    <a class="nav-link" href="#auth"><span class="badge POST">POST</span> Forgot Password</a>
+    <a class="nav-link" href="#auth"><span class="badge POST">POST</span> Reset Password</a>
+    <a class="nav-link" href="#auth"><span class="badge POST">POST</span> Change Password</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Projects</div>
+    <a class="nav-link" href="#projects"><span class="badge GET">GET</span> List Projects</a>
+    <a class="nav-link" href="#projects"><span class="badge POST">POST</span> Create Project</a>
+    <a class="nav-link" href="#projects"><span class="badge PATCH">PATCH</span> Update Project</a>
+    <a class="nav-link" href="#projects"><span class="badge DELETE">DEL</span> Delete Project</a>
+    <a class="nav-link" href="#members"><span class="badge GET">GET</span> List Members</a>
+    <a class="nav-link" href="#members"><span class="badge POST">POST</span> Add Members</a>
+    <a class="nav-link" href="#members"><span class="badge PATCH">PATCH</span> Update Role</a>
+    <a class="nav-link" href="#members"><span class="badge DELETE">DEL</span> Remove Member</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Tasks</div>
+    <a class="nav-link" href="#tasks"><span class="badge GET">GET</span> List Tasks</a>
+    <a class="nav-link" href="#tasks"><span class="badge POST">POST</span> Create Task</a>
+    <a class="nav-link" href="#tasks"><span class="badge PATCH">PATCH</span> Update Task</a>
+    <a class="nav-link" href="#tasks"><span class="badge DELETE">DEL</span> Delete Task</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Subtasks</div>
+    <a class="nav-link" href="#subtasks"><span class="badge GET">GET</span> List Subtasks</a>
+    <a class="nav-link" href="#subtasks"><span class="badge POST">POST</span> Create Subtask</a>
+    <a class="nav-link" href="#subtasks"><span class="badge PATCH">PATCH</span> Update Subtask</a>
+    <a class="nav-link" href="#subtasks"><span class="badge DELETE">DEL</span> Delete Subtask</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Notes</div>
+    <a class="nav-link" href="#notes"><span class="badge GET">GET</span> List Notes</a>
+    <a class="nav-link" href="#notes"><span class="badge POST">POST</span> Create Note</a>
+    <a class="nav-link" href="#notes"><span class="badge PATCH">PATCH</span> Update Note</a>
+    <a class="nav-link" href="#notes"><span class="badge DELETE">DEL</span> Delete Note</a>
+  </div>
+</aside>
+
+<!-- ─── Main ────────────────────────────────────────────────────── -->
+<main>
+
+  <!-- Overview -->
+  <section id="overview">
+    <h2>Overview</h2>
+    <p>A RESTful backend for a collaborative project management tool inspired by Basecamp. Built with <strong>Express</strong>, <strong>TypeScript</strong>, <strong>Bun</strong>, and <strong>MongoDB</strong>.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-title">Base URL</div>
+        <div class="card-value">https://basecamp-clone-backend-1.onrender.com/api/v1</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Content-Type</div>
+        <div class="card-value">application/json</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Auth Scheme</div>
+        <div class="card-value">Bearer &lt;access_token&gt;</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Response Shape</div>
+        <div class="card-value">{ statusCode, success, message, data }</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Auth Info -->
+  <section id="auth-info">
+    <h2>Authentication</h2>
+    <p>Protected routes require a JWT access token in the <code>Authorization</code> header:</p>
+    <pre>Authorization: Bearer &lt;your_access_token&gt;</pre>
+    <p style="margin-top:12px">Access tokens are short-lived (<code>15m</code>). Use <code>POST /auth/refresh-token</code> to rotate both tokens. Refresh tokens are single-use — reuse is detected and the family is invalidated.</p>
+    <div class="divider"></div>
+    <p><strong>Roles are project-scoped.</strong> A user can be <code>admin</code> in one project and <code>member</code> in another. The <code>validateProjectPermission</code> middleware sets the role per request.</p>
+    <div class="fields" style="margin-top:12px">
+      <div class="field"><span class="field-name">admin</span><span class="field-note">Full control — update/delete project, manage members, all task operations</span></div>
+      <div class="field"><span class="field-name">member</span><span class="field-note">Create tasks, update tasks they are assigned to or created</span></div>
+    </div>
+  </section>
+
+  <!-- Auth Endpoints -->
+  <section id="auth">
+    <h2>Auth <span>/api/v1/auth</span></h2>
+
+    <!-- Register -->
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <span class="path">/auth/register</span>
+        <span class="auth-pill">Public</span>
+        <span class="endpoint-desc">Register a new user</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body</div>
+        <div class="fields">
+          <div class="field"><span class="field-name">userName<span class="required-star">*</span></span><span class="field-type">string</span><span class="field-note">Unique username</span></div>
+          <div class="field"><span class="field-name">email<span class="required-star">*</span></span><span class="field-type">string</span><span class="field-note">Must be unique</span></div>
+          <div class="field"><span class="field-name">password<span class="required-star">*</span></span><span class="field-type">string</span><span class="field-note">Min 8 characters</span></div>
+          <div class="field"><span class="field-name">fullName</span><span class="field-type">string</span><span class="field-note">Optional</span></div>
+        </div>
+        <div class="detail-label">Response <code>201</code></div>
+        <pre>{
+  "statusCode": 201,
+  "success": true,
+  "message": "User registered. Check your email to verify your account.",
+  "data": { "user": { "_id": "...", "userName": "johndoe", "email": "..." } }
+}</pre>
+        <div class="detail-label">Notes</div>
+        <p>A verification email is queued on registration. Unverified accounts can still log in but will see <code>isEmailVerified: false</code>.</p>
+      </div>
+    </div>
+
+    <!-- Login -->
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <span class="path">/auth/login</span>
+        <span class="auth-pill">Public</span>
+        <span class="endpoint-desc">Login, returns tokens</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body</div>
+        <div class="fields">
+          <div class="field"><span class="field-name">email<span class="required-star">*</span></span><span class="field-type">string</span><span class="field-note">Email or username</span></div>
+          <div class="field"><span class="field-name">password<span class="required-star">*</span></span><span class="field-type">string</span></div>
+        </div>
+        <div class="detail-label">Response <code>200</code></div>
+        <pre>{
+  "data": {
+    "user": { ... },
+    "accessToken": "eyJ...",
+    "refreshToken": "eyJ..."
+  }
+}</pre>
+      </div>
+    </div>
+
+    <!-- Logout -->
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <span class="path">/auth/logout</span>
+        <span class="auth-pill required">JWT</span>
+        <span class="endpoint-desc">Invalidate refresh token</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <p>No request body needed. Clears the refresh token server-side and removes the cookie.</p>
+        <div class="detail-label">Response <code>200</code></div>
+        <pre>{ "message": "Logged out successfully" }</pre>
+      </div>
+    </div>
+
+    <!-- Refresh Token -->
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <span class="path">/auth/refresh-token</span>
+        <span class="auth-pill required">JWT</span>
+        <span class="endpoint-desc">Rotate access + refresh tokens</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body</div>
+        <div class="fields">
+          <div class="field"><span class="field-name">refreshToken<span class="required-star">*</span></span><span class="field-type">string</span><span class="field-note">Or send via cookie</span></div>
+        </div>
+        <div class="detail-label">Response <code>200</code></div>
+        <pre>{ "data": { "accessToken": "eyJ...", "refreshToken": "eyJ..." } }</pre>
+        <div class="detail-label">Notes</div>
+        <p>Refresh tokens are rotated on every use. Reusing an old refresh token invalidates the entire token family (reuse detection).</p>
+      </div>
+    </div>
+
+    <!-- Verify Email -->
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge GET">GET</span>
+        <span class="path">/auth/verify-email/:token</span>
+        <span class="auth-pill">Public</span>
+        <span class="endpoint-desc">Verify email from link</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <p>The <code>token</code> is sent in the verification email. Tokens are stored as SHA-256 hashes and expire after 24 hours.</p>
+      </div>
+    </div>
+
+    <!-- Resend Verification -->
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <span class="path">/auth/resend-email-verification</span>
+        <span class="auth-pill required">JWT</span>
+        <span class="endpoint-desc">Re-send verification email</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <p>No body required. Queues a new verification email for the logged-in user.</p>
+      </div>
+    </div>
+
+    <!-- Forgot Password -->
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <span class="path">/auth/forgot-password</span>
+        <span class="auth-pill">Public</span>
+        <span class="endpoint-desc">Request reset link</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body</div>
+        <div class="fields">
+          <div class="field"><span class="field-name">email<span class="required-star">*</span></span><span class="field-type">string</span></div>
+        </div>
+        <div class="detail-label">Notes</div>
+        <p>Always returns <code>200</code> regardless of whether the email exists — prevents email enumeration attacks.</p>
+      </div>
+    </div>
+
+    <!-- Reset Password -->
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <span class="path">/auth/reset-password/:token</span>
+        <span class="auth-pill">Public</span>
+        <span class="endpoint-desc">Reset password via token</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body</div>
+        <div class="fields">
+          <div class="field"><span class="field-name">newPassword<span class="required-star">*</span></span><span class="field-type">string</span></div>
+        </div>
+        <p>Token is single-use and expires after 24 hours.</p>
+      </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <span class="path">/auth/change-password</span>
+        <span class="auth-pill required">JWT</span>
+        <span class="endpoint-desc">Change password (requires old)</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body</div>
+        <div class="fields">
+          <div class="field"><span class="field-name">oldPassword<span class="required-star">*</span></span><span class="field-type">string</span></div>
+          <div class="field"><span class="field-name">newPassword<span class="required-star">*</span></span><span class="field-type">string</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section id="projects">
+    <h2>Projects <span>/api/v1/project</span></h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge GET">GET</span>
+        <span class="path">/project</span>
+        <span class="auth-pill required">JWT</span>
+        <span class="endpoint-desc">List your projects</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <p>Returns all projects the authenticated user is a member of.</p>
+        <div class="detail-label">Response <code>200</code></div>
+        <pre>{ "data": { "projects": [ { "_id": "...", "name": "...", "description": "..." } ] } }</pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <span class="path">/project</span>
+        <span class="auth-pill required">JWT</span>
+        <span class="endpoint-desc">Create a project</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body</div>
+        <div class="fields">
+          <div class="field"><span class="field-name">name<span class="required-star">*</span></span><span class="field-type">string</span></div>
+          <div class="field"><span class="field-name">description</span><span class="field-type">string</span></div>
+        </div>
+        <div class="detail-label">Notes</div>
+        <p>The creator is automatically assigned the <code>admin</code> role. A confirmation email is sent to the creator.</p>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge PATCH">PATCH</span>
+        <span class="path">/project/:projectId</span>
+        <span class="auth-pill required">Admin</span>
+        <span class="endpoint-desc">Update project</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body</div>
+        <div class="fields">
+          <div class="field"><span class="field-name">name</span><span class="field-type">string</span></div>
+          <div class="field"><span class="field-name">description</span><span class="field-type">string</span></div>
+        </div>
+        <p>All project admins are notified by email when the project is updated.</p>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge DELETE">DELETE</span>
+        <span class="path">/project/:projectId</span>
+        <span class="auth-pill required">Admin</span>
+        <span class="endpoint-desc">Delete project</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <p>Deletes the project and removes all membership records. The deleting admin receives a confirmation email.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Members -->
+  <section id="members">
+    <h2>Members <span>/api/v1/project/:projectId/members</span></h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge GET">GET</span>
+        <span class="path">/project/:projectId/members</span>
+        <span class="auth-pill required">Member</span>
+        <span class="endpoint-desc">List project members</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Response <code>200</code></div>
+        <pre>{ "data": { "members": [ { "user": { ... }, "role": "admin" } ] } }</pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <span class="path">/project/:projectId/members</span>
+        <span class="auth-pill required">Admin</span>
+        <span class="endpoint-desc">Add members</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body</div>
+        <pre>[
+  { "userId": "664a...", "role": "member" },
+  { "userId": "664b...", "role": "admin" }
+]</pre>
+        <p>Each added user receives a welcome email. Existing members are silently skipped.</p>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge PATCH">PATCH</span>
+        <span class="path">/project/:projectId/members/:userId</span>
+        <span class="auth-pill required">Admin</span>
+        <span class="endpoint-desc">Update member role</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body</div>
+        <div class="fields">
+          <div class="field"><span class="field-name">role<span class="required-star">*</span></span><span class="field-type">string</span><span class="field-note">admin | member</span></div>
+        </div>
+        <p>Admins cannot change their own role. Users promoted to <code>admin</code> receive a notification email.</p>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge DELETE">DELETE</span>
+        <span class="path">/project/:projectId/members/:userId</span>
+        <span class="auth-pill required">Admin</span>
+        <span class="endpoint-desc">Remove member</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <p>Admins cannot remove themselves.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tasks -->
+  <section id="tasks">
+    <h2>Tasks <span>/api/v1/project/:projectId</span></h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge GET">GET</span>
+        <span class="path">/project/:projectId/task</span>
+        <span class="auth-pill required">Member</span>
+        <span class="endpoint-desc">List all tasks</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <p>Returns all tasks in the project sorted newest first. Includes populated <code>assignedBy</code> and <code>assignedTo</code> user objects.</p>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <span class="path">/project/:projectId/task</span>
+        <span class="auth-pill required">Member</span>
+        <span class="endpoint-desc">Create a task</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body — <code>multipart/form-data</code></div>
+        <div class="fields">
+          <div class="field"><span class="field-name">title<span class="required-star">*</span></span><span class="field-type">string</span></div>
+          <div class="field"><span class="field-name">description</span><span class="field-type">string</span></div>
+          <div class="field"><span class="field-name">assignedTo</span><span class="field-type">string[]</span><span class="field-note">Array of user IDs</span></div>
+          <div class="field"><span class="field-name">status</span><span class="field-type">string</span><span class="field-note">todo | inProgress | done</span></div>
+          <div class="field"><span class="field-name">attachments</span><span class="field-type">files</span><span class="field-note">Max 1MB each</span></div>
+        </div>
+        <div class="detail-label">Notes</div>
+        <p>Send as <code>multipart/form-data</code> when including file attachments, otherwise <code>application/json</code>. Each assignee is notified by email.</p>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge PATCH">PATCH</span>
+        <span class="path">/project/:projectId/:taskId</span>
+        <span class="auth-pill required">Assigner / Assignee / Admin</span>
+        <span class="endpoint-desc">Update a task</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body — <code>multipart/form-data</code></div>
+        <div class="fields">
+          <div class="field"><span class="field-name">title</span><span class="field-type">string</span></div>
+          <div class="field"><span class="field-name">description</span><span class="field-type">string</span></div>
+          <div class="field"><span class="field-name">status</span><span class="field-type">string</span><span class="field-note">todo | inProgress | done</span></div>
+          <div class="field"><span class="field-name">assignedTo</span><span class="field-type">string[]</span></div>
+          <div class="field"><span class="field-name">attachments</span><span class="field-type">files</span></div>
+        </div>
+        <div class="detail-label">Email Notifications</div>
+        <p>Status change → all current assignees notified. New assignees added → only newly added users notified.</p>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge DELETE">DELETE</span>
+        <span class="path">/project/:projectId/:taskId</span>
+        <span class="auth-pill required">Creator / Admin</span>
+        <span class="endpoint-desc">Delete task + subtasks</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <p>Cascades to delete all subtasks. All assignees are notified by email.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subtasks -->
+  <section id="subtasks">
+    <h2>Subtasks <span>/api/v1/project/:projectId/:taskId</span></h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge GET">GET</span>
+        <span class="path">/project/:projectId/:taskId/subtask</span>
+        <span class="auth-pill required">Task Member</span>
+        <span class="endpoint-desc">List subtasks</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <p>Accessible to the task assigner, any assignee, or a project admin.</p>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <span class="path">/project/:projectId/:taskId/subtask</span>
+        <span class="auth-pill required">Task Member</span>
+        <span class="endpoint-desc">Create a subtask</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body</div>
+        <div class="fields">
+          <div class="field"><span class="field-name">title<span class="required-star">*</span></span><span class="field-type">string</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge PATCH">PATCH</span>
+        <span class="path">/project/:projectId/:taskId/subtask/:subtaskId</span>
+        <span class="auth-pill required">Task Member</span>
+        <span class="endpoint-desc">Update subtask</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body</div>
+        <div class="fields">
+          <div class="field"><span class="field-name">title</span><span class="field-type">string</span></div>
+          <div class="field"><span class="field-name">isCompleted</span><span class="field-type">boolean</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge DELETE">DELETE</span>
+        <span class="path">/project/:projectId/:taskId/subtask/:subtaskId</span>
+        <span class="auth-pill required">Creator / Admin</span>
+        <span class="endpoint-desc">Delete subtask</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <p>Only the subtask creator or a project admin can delete a subtask.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Notes -->
+  <section id="notes">
+    <h2>Notes <span>/api/v1/project/:projectId</span></h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge GET">GET</span>
+        <span class="path">/project/:projectId/notes</span>
+        <span class="auth-pill required">Member</span>
+        <span class="endpoint-desc">List project notes</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <p>Returns all notes in the project, sorted newest first, with populated author.</p>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge POST">POST</span>
+        <span class="path">/project/:projectId/notes</span>
+        <span class="auth-pill required">Member</span>
+        <span class="endpoint-desc">Create a note</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body</div>
+        <div class="fields">
+          <div class="field"><span class="field-name">content<span class="required-star">*</span></span><span class="field-type">string</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge PATCH">PATCH</span>
+        <span class="path">/project/:projectId/notes/:noteId</span>
+        <span class="auth-pill required">Author / Admin</span>
+        <span class="endpoint-desc">Update note</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="detail-label">Request Body</div>
+        <div class="fields">
+          <div class="field"><span class="field-name">content<span class="required-star">*</span></span><span class="field-type">string</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge DELETE">DELETE</span>
+        <span class="path">/project/:projectId/notes/:noteId</span>
+        <span class="auth-pill required">Author / Admin</span>
+        <span class="endpoint-desc">Delete note</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="endpoint-body">
+        <p>Only the note author or a project admin can delete a note.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggle(header) {
+    const body = header.nextElementSibling;
+    const chevron = header.querySelector('.chevron');
+    body.classList.toggle('open');
+    chevron.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

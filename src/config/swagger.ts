@@ -13,7 +13,7 @@ const options: swaggerJsdoc.Options = {
       {
         url:
           process.env.NODE_ENV === 'production'
-            ? 'https://basecamp-clone-backend-1.onrender.com'
+            ? 'https://basecamp-clone-backend-1.onrender.com/api/v1'
             : 'http://localhost:3000/api/v1',
         description:
           process.env.NODE_ENV === 'production' ? 'Production Server' : 'Local Development Server',

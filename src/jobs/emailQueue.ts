@@ -4,7 +4,8 @@ import type { SendEmailOptions } from '../types/types';
 
 const redisConnection: ConnectionOptions = {
   host: process.env.REDIS_HOST || '127.0.0.1',
-  port: Number(process.env.REDIS_PORT) || 6000,
+  port: Number(process.env.REDIS_PORT) || 6379,
+  password: process.env.REDIS_PASSWORD,
 };
 
 export const emailQueue = new Queue('EmailQueue', {

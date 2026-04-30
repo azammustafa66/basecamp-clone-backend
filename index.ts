@@ -6,12 +6,8 @@ import { emailWorker } from './src/jobs/emailQueue';
 const PORT = Number(process.env.PORT) || 3000;
 
 connectToDB()
-  .then(() => {
-    app.listen(PORT, 'localhost', () => logger.info(`Listening on localhost:${PORT}`));
-  })
-  .catch((error) => {
-    logger.error(error);
-  });
+  .then(() => app.listen(PORT, () => logger.info(`Listening on ${PORT}`)))
+  .catch((err) => logger.error(err));
 
 // Close the BullMQ worker cleanly so in-flight jobs finish before exit
 async function gracefulShutdown(signal: string) {

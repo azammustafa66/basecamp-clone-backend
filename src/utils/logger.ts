@@ -35,22 +35,29 @@ const format = winston.format.combine(
 
 // ─── Transports ───────────────────────────────────────────────────────────────
 
-const transports = [
+// 1. Always start with the Console transport (Render relies on this)
+const transports: winston.transport[] = [
   new winston.transports.Console({
     format: winston.format.combine(winston.format.colorize({ all: true })),
   }),
-  new winston.transports.File({
-    filename: 'logs/error.log',
-    level: 'error',
-  }),
-  new winston.transports.File({
-    filename: 'logs/info.log',
-    level: 'info',
-  }),
-  new winston.transports.File({
-    filename: 'logs/all.log',
-  }),
 ];
+
+// 2. Only add File transports if we are running locally (NOT in production)
+if (process.env.NODE_ENV !== 'production') {
+  transports.push(
+    new winston.transports.File({
+      filename: 'logs/error.log',
+      level: 'error',
+    }),
+    new winston.transports.File({
+      filename: 'logs/info.log',
+      level: 'info',
+    }),
+    new winston.transports.File({
+      filename: 'logs/all.log',
+    })
+  );
+}
 
 // ─── Logger ───────────────────────────────────────────────────────────────────
 

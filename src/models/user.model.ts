@@ -88,7 +88,7 @@ userSchema.method('generateTemporaryToken', (): TemporaryToken => {
   const unhashedToken = crypto.randomBytes(20).toString('hex');
   // Store only the hash in DB; the raw token goes in the email link so it's never persisted
   const hashedToken = crypto.createHash('sha256').update(unhashedToken).digest('hex');
-  const tempTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hrs
+  const tempTokenExpiry = new Date(Date.now() + (24 * 60 * 60 * 1000)); // 24 hrs
 
   return { unhashedToken, hashedToken, tempTokenExpiry };
 });

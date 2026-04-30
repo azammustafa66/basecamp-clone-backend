@@ -19,15 +19,24 @@ import { emailQueue } from '../jobs/emailQueue';
 export const createTask = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const { projectId } = req.params;
 
-  const { title, description, assignedTo, status, attachments } = req.body as {
+  const project = await Project.findById(projectId);
+  if (!project) throw new APIError(404, 'Project not found.');
+
+  const { title, description, assignedTo, status } = req.body as {
     title: string;
     description: string;
     assignedTo: string[];
     status: string;
-    attachments: { url?: string; mimeType?: string; size?: number }[];
   };
-
   if (!title?.trim()) throw new APIError(400, 'Task title is required');
+
+  const attachments = Array.isArray(req.files)
+    ? req.files.map((file: Express.Multer.File) => ({
+        url: `${process.env.SERVER_URL}/images/${file.filename}`,
+        mimeType: file.mimetype,
+        size: file.size,
+      }))
+    : [];
 
   const newTask = await Task.create({
     project: projectId,
@@ -36,7 +45,8 @@ export const createTask = asyncHandler(async (req: AuthenticatedRequest, res: Re
     assignedBy: req.user._id,
     assignedTo: Array.isArray(assignedTo) ? assignedTo : [],
     status: status || TaskStatus.TODO,
-    attachments: Array.isArray(attachments) ? attachments : [],
+    attachments:
+      attachments.length > 0 ? attachments : Array.isArray(attachments) ? attachments : [],
   });
 
   // Notify each assigned user so they know they have a new task
@@ -52,7 +62,7 @@ export const createTask = asyncHandler(async (req: AuthenticatedRequest, res: Re
       assignees.map((user) =>
         emailQueue.add('TaskAssigned', {
           to: user.email,
-          subject: `You've been assigned to "${title}"`,
+          subject: `You've been assigned to a task with name: "${title}" by ${req.user.fullName}`,
           mailgenContent: taskAssignedMailContent(user.userName, title, project?.name ?? ''),
         }),
       ),
@@ -83,24 +93,30 @@ export const updateTask = asyncHandler(async (req: AuthenticatedRequest, res: Re
   const task = await Task.findOne({ _id: taskId, project: projectId });
   if (!task) throw new APIError(404, 'Task not found');
 
-  const { title, description, assignedTo, status, attachments } = req.body as {
+  const { title, description, assignedTo, status } = req.body as {
     title: string;
     description: string;
     assignedTo: string[];
     status: string;
-    attachments: { url?: string; mimeType?: string; size?: number }[];
   };
+
+  const attachments = Array.isArray(req.files)
+    ? req.files.map((file: Express.Multer.File) => ({
+        url: `${process.env.SERVER_URL}/images/${file.filename}`,
+        mimeType: file.mimetype,
+        size: file.size,
+      }))
+    : [];
 
   const updatedFields: Record<string, any> = {};
   if (title?.trim()) updatedFields.title = title;
   if (status) updatedFields.status = status;
   if (description !== undefined) updatedFields.description = description;
   if (Array.isArray(assignedTo) && assignedTo.length > 0) updatedFields.assignedTo = assignedTo;
-  if (Array.isArray(attachments) && attachments.length > 0) updatedFields.attachments = attachments;
 
   const updatedTask = await Task.findOneAndUpdate(
     { _id: taskId, project: projectId },
-    { $set: updatedFields },
+    { $set: updatedFields, attachments: attachments },
     { returnDocument: 'after' },
   )
     .populate('assignedTo', 'userName fullName avatar email')
@@ -205,7 +221,7 @@ export const deleteTask = asyncHandler(async (req: AuthenticatedRequest, res: Re
   return res.status(200).json(new APIResponse(200, {}, 'Task deleted successfully'));
 });
 
-export const getAllSubTasks = asyncHandler(async (req, res, next) => {
+export const getAllSubTasks = asyncHandler(async (req, res) => {
   const { projectId, taskId } = req.params;
   if (!projectId || !taskId) throw new APIError(400, 'TaskId and ProjectId are required');
 
@@ -219,4 +235,3 @@ export const getAllSubTasks = asyncHandler(async (req, res, next) => {
     .status(200)
     .json(new APIResponse(200, { subtasks: subtasks }, 'Fetched all subtasks successfully.'));
 });
-

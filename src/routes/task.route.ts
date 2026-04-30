@@ -5,6 +5,7 @@ import {
   validateTaskPermission,
   verifyJWT,
 } from '../middlewares/auth.middleware';
+import { upload } from '../middlewares/multer.middleware';
 import { createTask, getTasks, updateTask, deleteTask } from '../controllers/task.controller';
 import {
   createSubTask,
@@ -61,7 +62,7 @@ router.use(verifyJWT, validateProjectPermission());
  *       201:
  *         description: Task created — assignees notified by email
  */
-router.route('/:projectId/task').get(getTasks).post(createTask);
+router.route('/:projectId/task').get(getTasks).post(upload.array('attachments'), createTask);
 
 /**
  * @swagger
@@ -113,7 +114,7 @@ router.route('/:projectId/task').get(getTasks).post(createTask);
  *       403:
  *         description: Must be task creator or admin
  */
-router.route('/:projectId/:taskId').patch(validateTaskPermission, updateTask).delete(deleteTask);
+router.route('/:projectId/:taskId').patch(validateTaskPermission, upload.array('attachments'), updateTask).delete(deleteTask);
 
 /**
  * @swagger

@@ -31,7 +31,7 @@ app.use(mainRouter);
 
 // ─── API Docs ─────────────────────────────────────────────────────────────────
 
-app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api/v1/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/', (req, res) => {
   res.status(200).json(new APIResponse(200, { message: 'Server up and running' }));

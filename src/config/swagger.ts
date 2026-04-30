@@ -8,14 +8,26 @@ const options: swaggerJsdoc.Options = {
       version: '1.0.0',
       description: 'REST API for the Basecamp clone — projects, tasks, subtasks, and notes.',
     },
-    servers: [{ url: '/api/v1', description: 'API v1' }],
+    // 👇 THIS IS THE FIX 👇
+    servers: [
+      {
+        url:
+          process.env.NODE_ENV === 'production'
+            ? 'https://basecamp-clone-backend-1.onrender.com'
+            : 'http://localhost:3000/api/v1',
+        description:
+          process.env.NODE_ENV === 'production' ? 'Production Server' : 'Local Development Server',
+      },
+    ],
+    // 👆👆👆👆
     components: {
       securitySchemes: {
         bearerAuth: {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'Paste your access token here. Alternatively send it as the `accessToken` cookie.',
+          description:
+            'Paste your access token here. Alternatively send it as the `accessToken` cookie.',
         },
       },
       schemas: {

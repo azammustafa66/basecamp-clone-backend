@@ -28,7 +28,8 @@ app.use(
 
 // ─── API Docs ─────────────────────────────────────────────────────────────────
 
-app.use('/api/v1/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api/v1/api-docs', swaggerUi.serve);
+app.get('/api/v1/api-docs', swaggerUi.setup(swaggerSpec));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
